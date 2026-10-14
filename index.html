@@ -475,6 +475,7 @@
   </footer>
 
   
+
 <script>
   const API_BASE_URL = "https://culturepilot-ai-agent.onrender.com";
 
@@ -486,26 +487,106 @@
 
   let selectedCategory = "Movies";
 
+  const agents = [
+    ["Planner", "Creates your discovery plan"],
+    ["Researcher", "Checks cultural data sources"],
+    ["Recommender", "Prepares relevant recommendations"],
+    ["Reviewer", "Checks recommendation availability"],
+    ["Executor", "Returns the final result"]
+  ];
+
   categoryButtons.forEach((button) => {
     button.addEventListener("click", () => {
       selectedCategory = button.dataset.category;
 
       categoryButtons.forEach((item) => {
-        const selected = item === button;
-        item.classList.toggle("active", selected);
-        item.setAttribute("aria-pressed", String(selected));
+        const active = item === button;
+        item.classList.toggle("active", active);
+        item.setAttribute("aria-pressed", String(active));
       });
     });
   });
 
-  function showResult(title, message) {
+  function renderWorkflow(data = null, error = false) {
+    const researchStatus = data?.research?.status;
+    const finalResult = data?.final_result || {};
+
     const heading = document.createElement("h3");
-    heading.textContent = title;
+    heading.textContent = error
+      ? "Connection issue"
+      : "CulturePilot Agent Workflow";
 
-    const paragraph = document.createElement("p");
-    paragraph.textContent = message;
+    const intro = document.createElement("p");
+    intro.textContent = error
+      ? "We could not complete the request. Please try again."
+      : "Your request has been processed by the agent workflow.";
 
-    result.replaceChildren(heading, paragraph);
+    const list = document.createElement("div");
+    list.style.cssText = "display:grid;gap:12px;margin-top:18px";
+
+    agents.forEach(([name, description], index) => {
+      const card = document.createElement("div");
+      card.style.cssText =
+        "padding:14px;border:1px solid rgba(150,150,180,.25);" +
+        "border-radius:12px;display:flex;gap:12px;align-items:flex-start";
+
+      const icon = document.createElement("span");
+      icon.style.fontSize = "20px";
+
+      const content = document.createElement("div");
+      const title = document.createElement("strong");
+      const detail = document.createElement("p");
+
+      let status = "Waiting for workflow";
+      let symbol = "○";
+
+      if (error) {
+        status = "Not confirmed";
+        symbol = "!";
+      } else if (data) {
+        if (index === 0) {
+          status = "Plan created";
+          symbol = "✓";
+        } else if (index === 1) {
+          status = researchStatus === "waiting_for_api_access"
+            ? "Waiting for Qloo API access"
+            : "Research status received";
+          symbol = researchStatus === "waiting_for_api_access" ? "⏳" : "✓";
+        } else if (index === 2) {
+          status = "Request prepared";
+          symbol = "✓";
+        } else if (index === 3) {
+          status = data.review?.review_status === "pending_data"
+            ? "Waiting for recommendation data"
+            : "Review status received";
+          symbol = data.review?.review_status === "pending_data" ? "⏳" : "✓";
+        } else {
+          status = finalResult.status === "success"
+            ? "Results ready"
+            : "Workflow response returned";
+          symbol = "✓";
+        }
+      }
+
+      icon.textContent = symbol;
+      title.textContent = `${index + 1}. ${name}`;
+      detail.textContent = `${description} — ${status}`;
+      detail.style.cssText = "margin:5px 0 0;opacity:.8;font-size:14px";
+
+      content.append(title, detail);
+      card.append(icon, content);
+      list.appendChild(card);
+    });
+
+    const qloo = document.createElement("p");
+    qloo.style.cssText = "margin-top:16px;font-weight:600";
+    qloo.textContent = error
+      ? "Qloo status: Unable to verify"
+      : data?.research?.status === "waiting_for_api_access"
+        ? "Qloo API: Awaiting access — live cultural data is not connected yet."
+        : "Qloo API: Check the research status above.";
+
+    result.replaceChildren(heading, intro, list, qloo);
     result.classList.add("show");
   }
 
@@ -520,23 +601,18 @@
     }
 
     submitButton.disabled = true;
-    submitButton.textContent = "Exploring your taste...";
+    submitButton.textContent = "Running agents...";
 
-    showResult(
-      "Connecting to CulturePilot AI ✨",
-      "Our agents are preparing your discovery request."
-    );
+    renderWorkflow();
 
     try {
       const response = await fetch(
         `${API_BASE_URL}/agent/recommend`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            interests: interests,
+            interests,
             category: selectedCategory
           })
         }
@@ -548,50 +624,19 @@
         throw new Error(
           typeof data.detail === "string"
             ? data.detail
-            : "The request could not be processed."
+            : "The backend request failed."
         );
       }
 
-      const finalResult = data.final_result || {};
-      const recommendations = Array.isArray(finalResult.recommendations)
-        ? finalResult.recommendations
-        : [];
-
-      if (recommendations.length > 0) {
-        const heading = document.createElement("h3");
-        heading.textContent = "Your discovery results ✨";
-
-        const list = document.createElement("ul");
-
-        recommendations.forEach((item) => {
-          const listItem = document.createElement("li");
-          listItem.textContent =
-            typeof item === "string"
-              ? item
-              : JSON.stringify(item);
-          list.appendChild(listItem);
-        });
-
-        result.replaceChildren(heading, list);
-        result.classList.add("show");
-      } else {
-        showResult(
-          "Your request has been processed ✨",
-          finalResult.message ||
-            "The workflow ran successfully, but personalized recommendations are waiting for Qloo API access."
-        );
-      }
-
-      console.log("CulturePilot workflow response:", data);
+      renderWorkflow(data);
+      console.log("CulturePilot workflow:", data);
     } catch (error) {
       console.error("CulturePilot API error:", error);
+      renderWorkflow(null, true);
 
-      showResult(
-        "Connection issue",
-        error.message.includes("Failed to fetch")
-          ? "Could not reach the backend. Please check the API URL, backend status, and CORS settings."
-          : error.message
-      );
+      const message = document.createElement("p");
+      message.textContent = error.message;
+      result.appendChild(message);
     } finally {
       submitButton.disabled = false;
       submitButton.innerHTML =
@@ -600,10 +645,7 @@
   });
 </script>
 
-    
-    
-    
-
+  
     
 
         
