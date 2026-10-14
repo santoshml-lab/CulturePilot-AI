@@ -6,6 +6,7 @@ const result = document.getElementById("result");
 const categoryButtons = document.querySelectorAll(".category");
 const submitButton = form.querySelector('button[type="submit"]');
 
+
 let selectedCategory = "Movies";
 
 const agents = [
