@@ -4,130 +4,519 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CulturePilot AI</title>
+  <meta name="theme-color" content="#090b18">
+  <meta name="description" content="Discover movies, music, food and travel experiences tailored to your taste with CulturePilot AI.">
+  <title>CulturePilot AI — Find Your Next Favorite Thing</title>
+
   <style>
+    :root {
+      --bg: #090b18;
+      --panel: #12162a;
+      --panel2: #191e36;
+      --text: #f7f7ff;
+      --muted: #a3abc5;
+      --purple: #a78bfa;
+      --cyan: #67e8f9;
+      --border: rgba(255,255,255,.1);
+    }
+
     * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
 
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0b1020;
-      color: #f8fafc;
-    }
-
-    header {
-      padding: 22px;
-      border-bottom: 1px solid #263047;
-      text-align: center;
-    }
-
-    header h1 { margin: 0; color: #a5b4fc; }
-    header p { color: #cbd5e1; }
-
-    main {
-      max-width: 760px;
-      margin: 35px auto;
-      padding: 20px;
-    }
-
-    .panel {
-      background: #151d32;
-      border: 1px solid #303b56;
-      border-radius: 18px;
-      padding: 24px;
-    }
-
-    label {
-      display: block;
-      margin: 18px 0 8px;
-    }
-
-    input, select, button {
-      width: 100%;
-      padding: 13px;
-      border-radius: 9px;
-      font-size: 16px;
-    }
-
-    input, select {
-      background: #0b1020;
-      color: white;
-      border: 1px solid #475569;
-    }
-
-    button {
-      margin-top: 22px;
-      border: 0;
-      background: #818cf8;
-      color: #111827;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    #result {
-      margin-top: 20px;
-      padding: 16px;
-      background: #202b46;
-      border-radius: 10px;
+      color: var(--text);
+      background:
+        radial-gradient(ellipse at 15% 0%, #292052 0, transparent 38%),
+        radial-gradient(ellipse at 100% 35%, #102d40 0, transparent 35%),
+        var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, Arial, sans-serif;
       line-height: 1.6;
     }
 
-    footer {
+    button, input { font: inherit; }
+
+    button { cursor: pointer; }
+
+    a { color: inherit; text-decoration: none; }
+
+    .container {
+      width: min(1120px, 92%);
+      margin: auto;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(9,11,24,.86);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -.7px;
+    }
+
+    .brand span { color: var(--purple); }
+
+    .brand-icon { margin-right: 7px; }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .nav-links a:hover { color: white; }
+
+    .nav-badge, .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 13px;
+      border: 1px solid rgba(167,139,250,.3);
+      background: rgba(167,139,250,.1);
+      color: #d7c8ff;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: 1px;
+    }
+
+    .hero {
       text-align: center;
-      padding: 24px;
-      color: #94a3b8;
+      padding: 76px 0 38px;
+    }
+
+    .hero h1 {
+      max-width: 820px;
+      margin: 23px auto 16px;
+      font-size: clamp(38px, 6.5vw, 70px);
+      line-height: 1.08;
+      letter-spacing: -3px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(100deg, #c4b5fd, #818cf8, #67e8f9);
+      color: transparent;
+      background-clip: text;
+      -webkit-background-clip: text;
+    }
+
+    .hero p {
+      max-width: 610px;
+      margin: auto;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    .discovery {
+      max-width: 790px;
+      margin: 30px auto 0;
+      padding: 28px;
+      text-align: left;
+      border: 1px solid rgba(167,139,250,.23);
+      border-radius: 24px;
+      background: linear-gradient(145deg, rgba(25,30,54,.96), rgba(16,19,37,.96));
+      box-shadow: 0 25px 90px rgba(0,0,0,.25);
+    }
+
+    .discovery h2 { margin: 0 0 5px; font-size: 23px; }
+
+    .subtext { color: var(--muted); margin: 0 0 24px; font-size: 14px; }
+
+    label {
+      display: block;
+      margin: 18px 0 9px;
+      font-weight: 650;
+      font-size: 14px;
+    }
+
+    .input-wrap { position: relative; }
+
+    input {
+      width: 100%;
+      min-height: 52px;
+      padding: 14px 16px;
+      color: white;
+      background: #0b0e1d;
+      border: 1px solid #353b57;
+      border-radius: 12px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 3px rgba(167,139,250,.13);
+    }
+
+    .categories {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 11px;
+    }
+
+    .category {
+      min-height: 94px;
+      padding: 14px 8px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #0e1224;
+      color: var(--muted);
+      transition: .2s ease;
+    }
+
+    .category .emoji { display: block; font-size: 25px; margin-bottom: 5px; }
+    .category strong { color: inherit; font-size: 13px; }
+
+    .category:hover, .category.active {
+      border-color: var(--purple);
+      background: rgba(167,139,250,.13);
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .category.active { box-shadow: inset 0 0 0 1px rgba(167,139,250,.2); }
+
+    .primary-btn {
+      width: 100%;
+      min-height: 54px;
+      margin-top: 24px;
+      border: 0;
+      border-radius: 12px;
+      color: #111127;
+      background: linear-gradient(100deg, #c4b5fd, #818cf8 55%, #67e8f9);
+      font-weight: 800;
+      box-shadow: 0 8px 28px rgba(129,140,248,.19);
+      transition: .2s ease;
+    }
+
+    .primary-btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
+
+    #result {
+      display: none;
+      margin-top: 18px;
+      padding: 17px;
+      border: 1px solid rgba(103,232,249,.25);
+      border-radius: 12px;
+      background: rgba(103,232,249,.06);
+      overflow-wrap: anywhere;
+    }
+
+    #result.show { display: block; }
+    #result h3 { margin: 0 0 5px; color: var(--cyan); font-size: 16px; }
+    #result p { margin: 0; color: #dce3f8; font-size: 14px; }
+
+    .trust {
+      margin-top: 17px;
+      text-align: center;
+      color: #8f99b7;
+      font-size: 12px;
+    }
+
+    .section { padding: 62px 0 70px; }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 23px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: clamp(25px, 4vw, 34px);
+      letter-spacing: -1px;
+    }
+
+    .section-head p { margin: 5px 0 0; color: var(--muted); font-size: 14px; }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .preview-card {
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 19px;
+      background: rgba(18,22,42,.87);
+      transition: .22s ease;
+    }
+
+    .preview-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(167,139,250,.5);
+    }
+
+    .art {
+      min-height: 170px;
+      display: grid;
+      place-items: center;
+      font-size: 55px;
+      position: relative;
+    }
+
+    .art.movie { background: linear-gradient(135deg, #29205a, #534080, #182d52); }
+    .art.music { background: linear-gradient(135deg, #48203d, #82466c, #202044); }
+    .art.travel { background: linear-gradient(135deg, #124b50, #267d78, #233c5e); }
+
+    .art::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(0deg, rgba(9,11,24,.35), transparent 65%);
+    }
+
+    .card-content { padding: 19px; }
+
+    .tag {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      color: var(--cyan);
+    }
+
+    .card-content h3 { margin: 8px 0 5px; font-size: 19px; }
+    .card-content p { margin: 0; color: var(--muted); font-size: 13px; }
+
+    .demo-note {
+      margin-top: 20px;
+      padding: 13px 15px;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 12px;
+    }
+
+    .demo-note strong { color: #ddd6fe; }
+
+    .bottom-cta {
+      margin-bottom: 60px;
+      padding: 34px 24px;
+      text-align: center;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background: linear-gradient(120deg, rgba(167,139,250,.12), rgba(103,232,249,.06));
+    }
+
+    .bottom-cta h2 { margin: 0 0 8px; }
+    .bottom-cta p { margin: 0; color: var(--muted); }
+
+    footer {
+      padding: 25px 0;
+      border-top: 1px solid var(--border);
+      color: #8f99b7;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 650px) {
+      .nav { min-height: 66px; }
+      .nav-links { display: none; }
+      .nav-badge { font-size: 10px; letter-spacing: .4px; }
+      .hero { padding-top: 50px; }
+      .hero h1 { letter-spacing: -1.7px; }
+      .hero p { font-size: 15px; }
+      .discovery { padding: 20px; border-radius: 19px; }
+      .categories { grid-template-columns: repeat(2, 1fr); }
+      .category { min-height: 82px; }
+      .section { padding: 48px 0; }
+      .preview-grid { grid-template-columns: 1fr; }
+      .art { min-height: 150px; }
+      .section-head { align-items: start; flex-direction: column; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition: none !important;
+      }
     }
   </style>
 </head>
+
 <body>
   <header>
-    <h1>✦ CulturePilot AI</h1>
-    <p>Discover experiences that match your taste.</p>
+    <div class="container nav">
+      <a class="brand" href="#"><span class="brand-icon">✦</span>CulturePilot<span> AI</span></a>
+
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="#discover">Discover</a>
+        <a href="#inspiration">Inspiration</a>
+        <a href="#about">About</a>
+      </nav>
+
+      <span class="nav-badge">✧ AI DISCOVERY</span>
+    </div>
   </header>
 
   <main>
-    <section class="panel">
-      <h2>Your Personal Culture Guide</h2>
-      <p>Tell us what you enjoy. Your personalized discovery journey starts here.</p>
+    <section class="hero container" id="discover">
+      <span class="eyebrow">✦ YOUR PERSONAL CULTURE GUIDE</span>
 
-      <form id="cultureForm">
-        <label for="interests">What are you interested in?</label>
-        <input id="interests" required
-          placeholder="e.g. science fiction, Indian food, travel">
+      <h1>Find your next<br><span class="gradient-text">favorite thing.</span></h1>
 
-        <label for="category">Choose a category</label>
-        <select id="category">
-          <option>Movies</option>
-          <option>Music</option>
-          <option>Food</option>
-          <option>Travel</option>
-          <option>All experiences</option>
-        </select>
+      <p>
+        From unforgettable films to hidden food gems,
+        discover experiences that feel uniquely you.
+      </p>
 
-        <button type="submit">Explore My Taste</button>
-      </form>
+      <section class="discovery" aria-labelledby="form-title">
+        <h2 id="form-title">Your world, your taste.</h2>
+        <p class="subtext">Tell us what you love. Let curiosity take the lead.</p>
 
-      <div id="result" aria-live="polite">
-        Your discovery results will appear here.
+        <form id="cultureForm">
+          <label for="interests">What are you into?</label>
+          <input
+            id="interests"
+            name="interests"
+            type="text"
+            required
+            maxlength="250"
+            placeholder="e.g. sci-fi films, Indian food, hidden cities"
+          >
+
+          <label>Choose your discovery</label>
+
+          <div class="categories" role="group" aria-label="Choose a category">
+            <button class="category active" type="button" data-category="Movies" aria-pressed="true">
+              <span class="emoji">🎬</span><strong>Movies</strong>
+            </button>
+            <button class="category" type="button" data-category="Music" aria-pressed="false">
+              <span class="emoji">🎧</span><strong>Music</strong>
+            </button>
+            <button class="category" type="button" data-category="Food" aria-pressed="false">
+              <span class="emoji">🍜</span><strong>Food</strong>
+            </button>
+            <button class="category" type="button" data-category="Travel" aria-pressed="false">
+              <span class="emoji">🌍</span><strong>Travel</strong>
+            </button>
+          </div>
+
+          <button class="primary-btn" type="submit">Explore My Taste <span aria-hidden="true">→</span></button>
+        </form>
+
+        <div id="result" role="status" aria-live="polite"></div>
+
+        <div class="trust">✧ Built for curious minds · Personalized discovery is coming soon</div>
+      </section>
+    </section>
+
+    <section class="section container" id="inspiration">
+      <div class="section-head">
+        <div>
+          <h2>A world tuned to you.</h2>
+          <p>A little inspiration for your next discovery.</p>
+        </div>
+        <span class="nav-badge">YOUR NEXT CHAPTER ✦</span>
       </div>
+
+      <div class="preview-grid">
+        <article class="preview-card">
+          <div class="art movie" aria-hidden="true">🎬</div>
+          <div class="card-content">
+            <span class="tag">MOVIES & STORIES</span>
+            <h3>Worlds worth exploring</h3>
+            <p>Find your next memorable film, from mind-bending sci-fi to hidden gems.</p>
+          </div>
+        </article>
+
+        <article class="preview-card">
+          <div class="art music" aria-hidden="true">🎶</div>
+          <div class="card-content">
+            <span class="tag">SOUNDS & CULTURE</span>
+            <h3>Feel something new</h3>
+            <p>Explore fresh sounds, artists and musical cultures that fit your mood.</p>
+          </div>
+        </article>
+
+        <article class="preview-card">
+          <div class="art travel" aria-hidden="true">🌏</div>
+          <div class="card-content">
+            <span class="tag">FOOD & TRAVEL</span>
+            <h3>Go beyond the usual</h3>
+            <p>Get inspired by food traditions, local experiences and places to discover.</p>
+          </div>
+        </article>
+      </div>
+
+      <div class="demo-note">
+        <strong>Preview mode:</strong> These cards are design previews, not live recommendations.
+        Personalized results will be enabled after the recommendation engine is connected.
+      </div>
+    </section>
+
+    <section class="container bottom-cta" id="about">
+      <h2>Curiosity looks good on you. ✨</h2>
+      <p>One interest can open up a whole new world.</p>
     </section>
   </main>
 
-  <footer>CulturePilot AI · Powered by curiosity</footer>
+  <footer>
+    <div class="container">
+      © 2026 CulturePilot AI · Discover more. Experience differently.
+    </div>
+  </footer>
 
   <script>
-    document.getElementById("cultureForm").addEventListener("submit", function(event) {
+    const form = document.getElementById("cultureForm");
+    const interestsInput = document.getElementById("interests");
+    const result = document.getElementById("result");
+    const categoryButtons = document.querySelectorAll(".category");
+
+    let selectedCategory = "Movies";
+
+    categoryButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        selectedCategory = button.dataset.category;
+
+        categoryButtons.forEach((item) => {
+          const selected = item === button;
+          item.classList.toggle("active", selected);
+          item.setAttribute("aria-pressed", String(selected));
+        });
+      });
+    });
+
+    form.addEventListener("submit", (event) => {
       event.preventDefault();
 
-      const interests = document.getElementById("interests").value.trim();
-      const category = document.getElementById("category").value;
-      const result = document.getElementById("result");
+      const interests = interestsInput.value.trim();
+      if (!interests) {
+        interestsInput.focus();
+        return;
+      }
 
-      result.textContent =
+      const heading = document.createElement("h3");
+      heading.textContent = "Your discovery journey starts here ✨";
+
+      const message = document.createElement("p");
+      message.textContent =
         "Your interests: " + interests +
-        ". Category: " + category +
-        ". CulturePilot is ready for its AI recommendation engine.";
+        ". Category: " + selectedCategory +
+        ". This demo is ready for the CulturePilot recommendation engine.";
+
+      result.replaceChildren(heading, message);
+      result.classList.add("show");
+      result.scrollIntoView({ behavior: "smooth", block: "nearest" });
     });
   </script>
 </body>
 </html>
+
