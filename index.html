@@ -474,49 +474,139 @@
     </div>
   </footer>
 
-  <script>
-    const form = document.getElementById("cultureForm");
-    const interestsInput = document.getElementById("interests");
-    const result = document.getElementById("result");
-    const categoryButtons = document.querySelectorAll(".category");
+  
+<script>
+  const API_BASE_URL = "https://culturepilot-ai-agent.onrender.com";
 
-    let selectedCategory = "Movies";
+  const form = document.getElementById("cultureForm");
+  const interestsInput = document.getElementById("interests");
+  const result = document.getElementById("result");
+  const categoryButtons = document.querySelectorAll(".category");
+  const submitButton = form.querySelector('button[type="submit"]');
 
-    categoryButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        selectedCategory = button.dataset.category;
+  let selectedCategory = "Movies";
 
-        categoryButtons.forEach((item) => {
-          const selected = item === button;
-          item.classList.toggle("active", selected);
-          item.setAttribute("aria-pressed", String(selected));
-        });
+  categoryButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      selectedCategory = button.dataset.category;
+
+      categoryButtons.forEach((item) => {
+        const selected = item === button;
+        item.classList.toggle("active", selected);
+        item.setAttribute("aria-pressed", String(selected));
       });
     });
+  });
 
-    form.addEventListener("submit", (event) => {
-      event.preventDefault();
+  function showResult(title, message) {
+    const heading = document.createElement("h3");
+    heading.textContent = title;
 
-      const interests = interestsInput.value.trim();
-      if (!interests) {
-        interestsInput.focus();
-        return;
+    const paragraph = document.createElement("p");
+    paragraph.textContent = message;
+
+    result.replaceChildren(heading, paragraph);
+    result.classList.add("show");
+  }
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const interests = interestsInput.value.trim();
+
+    if (!interests) {
+      interestsInput.focus();
+      return;
+    }
+
+    submitButton.disabled = true;
+    submitButton.textContent = "Exploring your taste...";
+
+    showResult(
+      "Connecting to CulturePilot AI ✨",
+      "Our agents are preparing your discovery request."
+    );
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/agent/recommend`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            interests: interests,
+            category: selectedCategory
+          })
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          typeof data.detail === "string"
+            ? data.detail
+            : "The request could not be processed."
+        );
       }
 
-      const heading = document.createElement("h3");
-      heading.textContent = "Your discovery journey starts here ✨";
+      const finalResult = data.final_result || {};
+      const recommendations = Array.isArray(finalResult.recommendations)
+        ? finalResult.recommendations
+        : [];
 
-      const message = document.createElement("p");
-      message.textContent =
-        "Your interests: " + interests +
-        ". Category: " + selectedCategory +
-        ". This demo is ready for the CulturePilot recommendation engine.";
+      if (recommendations.length > 0) {
+        const heading = document.createElement("h3");
+        heading.textContent = "Your discovery results ✨";
 
-      result.replaceChildren(heading, message);
-      result.classList.add("show");
-      result.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    });
-  </script>
+        const list = document.createElement("ul");
+
+        recommendations.forEach((item) => {
+          const listItem = document.createElement("li");
+          listItem.textContent =
+            typeof item === "string"
+              ? item
+              : JSON.stringify(item);
+          list.appendChild(listItem);
+        });
+
+        result.replaceChildren(heading, list);
+        result.classList.add("show");
+      } else {
+        showResult(
+          "Your request has been processed ✨",
+          finalResult.message ||
+            "The workflow ran successfully, but personalized recommendations are waiting for Qloo API access."
+        );
+      }
+
+      console.log("CulturePilot workflow response:", data);
+    } catch (error) {
+      console.error("CulturePilot API error:", error);
+
+      showResult(
+        "Connection issue",
+        error.message.includes("Failed to fetch")
+          ? "Could not reach the backend. Please check the API URL, backend status, and CORS settings."
+          : error.message
+      );
+    } finally {
+      submitButton.disabled = false;
+      submitButton.innerHTML =
+        'Explore My Taste <span aria-hidden="true">→</span>';
+    }
+  });
+</script>
+
+    
+    
+    
+
+    
+
+        
 </body>
 </html>
 
