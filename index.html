@@ -1,0 +1,133 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CulturePilot AI</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b1020;
+      color: #f8fafc;
+    }
+
+    header {
+      padding: 22px;
+      border-bottom: 1px solid #263047;
+      text-align: center;
+    }
+
+    header h1 { margin: 0; color: #a5b4fc; }
+    header p { color: #cbd5e1; }
+
+    main {
+      max-width: 760px;
+      margin: 35px auto;
+      padding: 20px;
+    }
+
+    .panel {
+      background: #151d32;
+      border: 1px solid #303b56;
+      border-radius: 18px;
+      padding: 24px;
+    }
+
+    label {
+      display: block;
+      margin: 18px 0 8px;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 13px;
+      border-radius: 9px;
+      font-size: 16px;
+    }
+
+    input, select {
+      background: #0b1020;
+      color: white;
+      border: 1px solid #475569;
+    }
+
+    button {
+      margin-top: 22px;
+      border: 0;
+      background: #818cf8;
+      color: #111827;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #result {
+      margin-top: 20px;
+      padding: 16px;
+      background: #202b46;
+      border-radius: 10px;
+      line-height: 1.6;
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>✦ CulturePilot AI</h1>
+    <p>Discover experiences that match your taste.</p>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>Your Personal Culture Guide</h2>
+      <p>Tell us what you enjoy. Your personalized discovery journey starts here.</p>
+
+      <form id="cultureForm">
+        <label for="interests">What are you interested in?</label>
+        <input id="interests" required
+          placeholder="e.g. science fiction, Indian food, travel">
+
+        <label for="category">Choose a category</label>
+        <select id="category">
+          <option>Movies</option>
+          <option>Music</option>
+          <option>Food</option>
+          <option>Travel</option>
+          <option>All experiences</option>
+        </select>
+
+        <button type="submit">Explore My Taste</button>
+      </form>
+
+      <div id="result" aria-live="polite">
+        Your discovery results will appear here.
+      </div>
+    </section>
+  </main>
+
+  <footer>CulturePilot AI · Powered by curiosity</footer>
+
+  <script>
+    document.getElementById("cultureForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      const interests = document.getElementById("interests").value.trim();
+      const category = document.getElementById("category").value;
+      const result = document.getElementById("result");
+
+      result.textContent =
+        "Your interests: " + interests +
+        ". Category: " + category +
+        ". CulturePilot is ready for its AI recommendation engine.";
+    });
+  </script>
+</body>
+</html>
