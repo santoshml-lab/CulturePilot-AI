@@ -338,6 +338,106 @@
         transition: none !important;
       }
     }
+
+/* CulturePilot AI — Premium Agent Workflow UI */
+
+.agent-list {
+display: grid;
+gap: 10px;
+margin-top: 20px;
+}
+
+.agent-card {
+display: flex;
+align-items: flex-start;
+gap: 13px;
+padding: 16px;
+border: 1px solid rgba(167, 139, 250, 0.25);
+border-radius: 14px;
+background: linear-gradient(135deg, #191e36, #101325);
+transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.agent-card:hover {
+transform: translateY(-2px);
+border-color: rgba(103, 232, 249, 0.55);
+}
+
+.agent-icon {
+flex: 0 0 34px;
+width: 34px;
+height: 34px;
+display: grid;
+place-items: center;
+border: 1px solid rgba(167, 139, 250, 0.3);
+border-radius: 10px;
+font-size: 17px;
+background: rgba(167, 139, 250, 0.12);
+}
+
+.agent-content {
+flex: 1;
+min-width: 0;
+}
+
+.agent-content strong {
+display: block;
+color: #f7f7ff;
+font-size: 14px;
+}
+
+.agent-content p {
+margin: 5px 0 0 !important;
+color: #a3abc5 !important;
+font-size: 12px !important;
+line-height: 1.6;
+}
+
+.status-complete {
+color: #67e8a5;
+background: rgba(103, 232, 165, 0.09);
+border-color: rgba(103, 232, 165, 0.3);
+}
+
+.status-pending {
+color: #fcd34d;
+background: rgba(252, 211, 77, 0.08);
+border-color: rgba(252, 211, 77, 0.3);
+}
+
+.status-waiting {
+color: #a3abc5;
+}
+
+.status-error {
+color: #fca5a5;
+background: rgba(252, 165, 165, 0.08);
+}
+
+.qloo-status {
+margin-top: 16px !important;
+padding: 13px;
+border: 1px solid rgba(103, 232, 249, 0.25);
+border-radius: 12px;
+background: rgba(103, 232, 249, 0.06);
+color: #b9f5ff !important;
+font-size: 13px !important;
+line-height: 1.6;
+}
+
+.primary-btn:disabled {
+opacity: 0.7;
+cursor: wait;
+}
+
+@media (max-width: 480px) {
+.agent-card {
+padding: 12px;
+gap: 10px;
+}
+}
+
+
   
 
 
