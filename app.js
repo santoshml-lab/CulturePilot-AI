@@ -277,8 +277,12 @@ renderWorkflow(
 );
 
 } finally {
-submitButton.disabled = false;
-submitButton.innerHTML =
-'Explore My Taste <span aria-hidden="true">→</span>';
+  submitButton.disabled = false;
+  submitButton.innerHTML =
+    'Explore My Taste <span aria-hidden="true">→</span>';
 }
 });
+
+
+
+
