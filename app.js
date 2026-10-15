@@ -11,6 +11,106 @@ const submitButton = form.querySelector('button[type="submit"]');
 
 let selectedCategory = "Movies";
 
+const demoRecommendations = {
+  Movies: [
+    {
+      title: "Interstellar",
+      description: "A science-fiction journey through space, time, and family."
+    },
+    {
+      title: "The Martian",
+      description: "A resourceful astronaut's survival story on Mars."
+    },
+    {
+      title: "Arrival",
+      description: "A thoughtful science-fiction mystery about language and communication."
+    }
+  ],
+
+  Music: [
+    {
+      title: "Indian Indie",
+      description: "Explore independent Indian artists and fresh sounds."
+    },
+    {
+      title: "Lo-fi Beats",
+      description: "Relax with mellow instrumental music."
+    },
+    {
+      title: "World Music",
+      description: "Discover musical traditions from different cultures."
+    }
+  ],
+
+  Food: [
+    {
+      title: "Regional Indian Thalis",
+      description: "Explore regional dishes, flavours, and traditional meals."
+    },
+    {
+      title: "Street Food Adventures",
+      description: "Discover popular street-food traditions from different cities."
+    },
+    {
+      title: "Global Cuisine",
+      description: "Try learning about Japanese, Mediterranean, and Mexican dishes."
+    }
+  ],
+
+  Travel: [
+    {
+      title: "Jaipur, India",
+      description: "Explore historic architecture, markets, and local culture."
+    },
+    {
+      title: "Kyoto, Japan",
+      description: "Discover traditional streets, temples, and seasonal culture."
+    },
+    {
+      title: "Kerala, India",
+      description: "Explore backwaters, regional food, and natural landscapes."
+    }
+  ]
+};
+
+function showDemoRecommendations(category, interests) {
+  const heading = document.createElement("h3");
+  heading.textContent = "Demo Recommendations";
+
+  const note = document.createElement("p");
+  note.textContent =
+    "Demo mode: these are sample suggestions, not live Qloo results. " +
+    `Category: ${category}. Your interests: ${interests}.`;
+
+  const cards = document.createElement("div");
+  cards.className = "agent-list";
+
+  const recommendations = demoRecommendations[category] ||
+    demoRecommendations.Movies;
+
+  recommendations.forEach((item) => {
+    const card = document.createElement("article");
+    card.className = "agent-card";
+
+    const content = document.createElement("div");
+    content.className = "agent-content";
+
+    const title = document.createElement("strong");
+    title.textContent = item.title;
+
+    const description = document.createElement("p");
+    description.textContent = item.description;
+
+    content.append(title, description);
+    card.append(content);
+    cards.append(card);
+  });
+
+  result.replaceChildren(heading, note, cards);
+  result.classList.add("show");
+}
+
+
 const agents = [
 {
 name: "Planner",
@@ -266,8 +366,19 @@ if (!response.ok) {
   throw new Error(message);
 }
 
+
 renderWorkflow(data);
+
+const qlooConnected = data?.plan?.qloo_connected === true;
+const recommendationsReady = data?.final_result?.status === "success";
+
+if (!qlooConnected && !recommendationsReady) {
+  showDemoRecommendations(selectedCategory, interests);
+}
+
 console.log("CulturePilot workflow:", data);
+
+
 
 } catch (error) {
 console.error("CulturePilot API error:", error);
