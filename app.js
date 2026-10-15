@@ -119,15 +119,13 @@ categoryButtons.forEach((button) => {
 });
 
 // Safely create a recommendation card
+
 function createRecommendationCard(item) {
   const card = document.createElement("article");
-  card.className = "agent-card";
+  card.className = "recommendation-card";
 
-  const content = document.createElement("div");
-  content.className = "agent-content";
-
-  const title = document.createElement("strong");
-  title.textContent = item.title || item.name || "Untitled";
+  const title = document.createElement("h3");
+  title.textContent = item.title || item.name || "Untitled recommendation";
 
   const description = document.createElement("p");
   description.textContent =
@@ -136,11 +134,39 @@ function createRecommendationCard(item) {
     item.genre_description ||
     "No additional description available.";
 
-  content.append(title, description);
-  card.append(content);
+  card.appendChild(title);
+
+  // Display the heuristic relevance score when available.
+  if (typeof item.match_score === "number") {
+    const score = document.createElement("p");
+    score.className = "match-score";
+    score.textContent = `Relevance score: ${item.match_score}/100`;
+    card.appendChild(score);
+  }
+
+  // Explain which interests matched.
+  if (item.match_reason) {
+    const reason = document.createElement("p");
+    reason.className = "match-reason";
+    reason.textContent = item.match_reason;
+    card.appendChild(reason);
+  }
+
+  card.appendChild(description);
+
+  if (item.source) {
+    const source = document.createElement("small");
+    source.textContent = `Source: ${item.source}`;
+    card.appendChild(source);
+  }
 
   return card;
 }
+
+  
+
+
+
 
 // Display actual backend recommendations
 function renderRecommendations(data) {
