@@ -132,8 +132,10 @@ intro.textContent =
 "The backend request could not be completed. Please try again.";
 } else if (data) {
 intro.textContent =
-"Category: ${data.plan?.category || selectedCategory} · " +
-"Interests: ${data.plan?.interests || interestsInput.value.trim()}";
+  `Category: ${data.plan?.category || selectedCategory} · ` +
+  `Interests: ${data.plan?.interests || interestsInput.value.trim()}`;
+
+
 } else {
 intro.textContent = "Preparing your five-agent discovery workflow...";
 }
@@ -196,17 +198,24 @@ const qloo = document.createElement("p");
 qloo.className = "qloo-status";
 
 if (error) {
-qloo.textContent = errorMessage
-? "Request error: ${errorMessage}"
-: "Qloo status: Unable to verify.";
-} else if (data?.plan?.qloo_connected === false) {
+  qloo.textContent = errorMessage
+    ? `Request error: ${errorMessage}`
+    : "Qloo status: Unable to verify.";
+}
+
+
+
+ else if (data?.plan?.qloo_connected === false) {
 qloo.textContent =
 "Qloo API: Access pending. Live cultural data and personalized " +
 "recommendations are not available yet.";
-} else if (data?.plan?.qloo_connected === true) {
-qloo.textContent =
-"Qloo API: Connected. ${data?.final_result?.message || ""}";
-} else {
+} } else if (data?.plan?.qloo_connected === true) {
+  qloo.textContent =
+    `Qloo API: Connected. ${data?.final_result?.message || ""}`;
+}
+
+
+ else {
 qloo.textContent =
 "Qloo API status was not provided by the backend.";
 }
@@ -231,7 +240,7 @@ submitButton.textContent = "Running agents...";
 renderWorkflow();
 
 try {
-const response = await fetch("${API_BASE_URL}/agent/recommend", {
+const response = await fetch(`${API_BASE_URL}/agent/recommend`, {
 method: "POST",
 headers: {
 "Content-Type": "application/json"
