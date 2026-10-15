@@ -215,6 +215,7 @@ if (error) {
 
 result.replaceChildren(heading, intro, list, qloo);
 result.classList.add("show");
+}
 
 
 
