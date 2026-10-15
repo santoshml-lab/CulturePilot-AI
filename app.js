@@ -1,4 +1,3 @@
-alert("CulturePilot app.js is loading");
 
 const API_BASE_URL = "https://culturepilot-ai-agent.onrender.com";
 
@@ -8,393 +7,337 @@ const result = document.getElementById("result");
 const categoryButtons = document.querySelectorAll(".category");
 const submitButton = form.querySelector('button[type="submit"]');
 
-
 let selectedCategory = "Movies";
 
-const demoRecommendations = {
-  Movies: [
-    {
-      title: "Interstellar",
-      description: "A science-fiction journey through space, time, and family."
-    },
-    {
-      title: "The Martian",
-      description: "A resourceful astronaut's survival story on Mars."
-    },
-    {
-      title: "Arrival",
-      description: "A thoughtful science-fiction mystery about language and communication."
-    }
-  ],
+// Five-agent workflow
+const agents = [
+  {
+    name: "Planner",
+    description: "Understands your interests and category.",
+    getStatus(data) {
+      const status = data?.plan?.status;
 
-  Music: [
-    {
-      title: "Indian Indie",
-      description: "Explore independent Indian artists and fresh sounds."
-    },
-    {
-      title: "Lo-fi Beats",
-      description: "Relax with mellow instrumental music."
-    },
-    {
-      title: "World Music",
-      description: "Discover musical traditions from different cultures."
+      return {
+        status: status === "plan_created"
+          ? "Plan created"
+          : status || "Status unavailable",
+        detail: data?.plan?.plan?.[0]?.task || this.description,
+        state: status === "plan_created" ? "complete" : "waiting"
+      };
     }
-  ],
+  },
+  {
+    name: "Researcher",
+    description: "Retrieves cultural data from Qloo.",
+    getStatus(data) {
+      const research = data?.research || {};
+      const status = research.status;
 
-  Food: [
-    {
-      title: "Regional Indian Thalis",
-      description: "Explore regional dishes, flavours, and traditional meals."
-    },
-    {
-      title: "Street Food Adventures",
-      description: "Discover popular street-food traditions from different cities."
-    },
-    {
-      title: "Global Cuisine",
-      description: "Try learning about Japanese, Mediterranean, and Mexican dishes."
+      return {
+        status: status || "Status unavailable",
+        detail: research.message || this.description,
+        state: status === "success"
+          ? "complete"
+          : status
+            ? "error"
+            : "waiting"
+      };
     }
-  ],
+  },
+  {
+    name: "Recommender",
+    description: "Selects recommendations matching your interests.",
+    getStatus(data) {
+      const recommendation = data?.recommendation || {};
+      const recommendations = recommendation.recommendations || [];
+      const success =
+        recommendation.recommendation_status === "success" &&
+        recommendations.length > 0;
 
-  Travel: [
-    {
-      title: "Jaipur, India",
-      description: "Explore historic architecture, markets, and local culture."
-    },
-    {
-      title: "Kyoto, Japan",
-      description: "Discover traditional streets, temples, and seasonal culture."
-    },
-    {
-      title: "Kerala, India",
-      description: "Explore backwaters, regional food, and natural landscapes."
+      return {
+        status: success
+          ? "success"
+          : recommendation.recommendation_status || "Waiting for data",
+        detail: recommendation.message || this.description,
+        state: success
+          ? "complete"
+          : recommendations.length > 0
+            ? "complete"
+            : "pending"
+      };
     }
-  ]
-};
+  },
+  {
+    name: "Reviewer",
+    description: "Checks recommendation availability.",
+    getStatus(data) {
+      const review = data?.review || {};
 
-function showDemoRecommendations(category, interests) {
+      return {
+        status: review.review_status ||
+          (review.approved === true ? "approved" : "Review complete"),
+        detail: review.reason || this.description,
+        state: review.approved === true ? "complete" : "pending"
+      };
+    }
+  },
+  {
+    name: "Executor",
+    description: "Returns the final recommendations.",
+    getStatus(data) {
+      const finalResult = data?.final_result || {};
+      const recommendations =
+        data?.recommendation?.recommendations || [];
+
+      const success =
+        finalResult.status === "success" &&
+        recommendations.length > 0;
+
+      return {
+        status: success
+          ? "Results ready"
+          : finalResult.status || "Results pending",
+        detail: finalResult.message || this.description,
+        state: success ? "complete" : "pending"
+      };
+    }
+  }
+];
+
+// Category selection
+categoryButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    selectedCategory = button.dataset.category;
+
+    categoryButtons.forEach((item) => {
+      const active = item === button;
+
+      item.classList.toggle("active", active);
+      item.setAttribute("aria-pressed", String(active));
+    });
+  });
+});
+
+// Safely create a recommendation card
+function createRecommendationCard(item) {
+  const card = document.createElement("article");
+  card.className = "agent-card";
+
+  const content = document.createElement("div");
+  content.className = "agent-content";
+
+  const title = document.createElement("strong");
+  title.textContent = item.title || item.name || "Untitled";
+
+  const description = document.createElement("p");
+  description.textContent =
+    item.description ||
+    item.plot_summary ||
+    item.genre_description ||
+    "No additional description available.";
+
+  content.append(title, description);
+  card.append(content);
+
+  return card;
+}
+
+// Display actual backend recommendations
+function renderRecommendations(data) {
+  const recommendations =
+    data?.recommendation?.recommendations || [];
+
   const heading = document.createElement("h3");
-  heading.textContent = "Demo Recommendations";
+  heading.textContent = "Your Cultural Recommendations";
+
+  const section = document.createElement("section");
+  section.className = "recommendation-results";
 
   const note = document.createElement("p");
-  note.textContent =
-    "Demo mode: these are sample suggestions, not live Qloo results. " +
-    `Category: ${category}. Your interests: ${interests}.`;
 
-  const cards = document.createElement("div");
-  cards.className = "agent-list";
+  if (recommendations.length > 0) {
+    const cards = document.createElement("div");
+    cards.className = "agent-list";
 
-  const recommendations = demoRecommendations[category] ||
-    demoRecommendations.Movies;
+    recommendations.forEach((item) => {
+      cards.append(createRecommendationCard(item));
+    });
 
-  recommendations.forEach((item) => {
-    const card = document.createElement("article");
+    const source = data?.research?.source;
+
+    note.textContent = source === "Qloo"
+      ? `Showing ${recommendations.length} recommendations from the backend. Research source: Qloo.`
+      : `Showing ${recommendations.length} recommendations returned by the backend.`;
+
+    section.append(heading, note, cards);
+  } else {
+    note.textContent =
+      "No recommendations were returned. Please try another interest or check the backend response.";
+
+    section.append(heading, note);
+  }
+
+  result.append(section);
+}
+
+// Display workflow status
+function renderWorkflow(data = null, error = false, errorMessage = "") {
+  const heading = document.createElement("h3");
+
+  heading.textContent = error
+    ? "Workflow Connection Issue"
+    : "CulturePilot Agent Workflow";
+
+  const intro = document.createElement("p");
+
+  if (error) {
+    intro.textContent =
+      "The backend request could not be completed.";
+  } else if (data) {
+    intro.textContent =
+      `Category: ${data.plan?.category || selectedCategory} · ` +
+      `Interests: ${data.plan?.interests || interestsInput.value.trim()}`;
+  } else {
+    intro.textContent =
+      "Preparing your five-agent discovery workflow...";
+  }
+
+  const list = document.createElement("div");
+  list.className = "agent-list";
+
+  agents.forEach((agent, index) => {
+    const card = document.createElement("div");
     card.className = "agent-card";
+
+    const icon = document.createElement("span");
+    icon.className = "agent-icon";
 
     const content = document.createElement("div");
     content.className = "agent-content";
 
     const title = document.createElement("strong");
-    title.textContent = item.title;
+    title.textContent = `${index + 1}. ${agent.name}`;
 
-    const description = document.createElement("p");
-    description.textContent = item.description;
+    const statusLine = document.createElement("p");
+    const detail = document.createElement("p");
 
-    content.append(title, description);
-    card.append(content);
-    cards.append(card);
+    let agentStatus = {
+      status: "Waiting for workflow",
+      detail: agent.description,
+      state: "waiting"
+    };
+
+    if (error) {
+      agentStatus = {
+        status: "Not confirmed",
+        detail: "The request failed before this step could be verified.",
+        state: "error"
+      };
+    } else if (data) {
+      agentStatus = agent.getStatus(data);
+    }
+
+    const symbols = {
+      complete: "✓",
+      pending: "⏳",
+      waiting: "○",
+      error: "!"
+    };
+
+    icon.textContent = symbols[agentStatus.state] || "○";
+    icon.classList.add(`status-${agentStatus.state}`);
+
+    statusLine.textContent = `Status: ${agentStatus.status}`;
+    detail.textContent = agentStatus.detail;
+
+    content.append(title, statusLine, detail);
+    card.append(icon, content);
+    list.append(card);
   });
 
-  result.replaceChildren(heading, note, cards);
+  const qloo = document.createElement("p");
+  qloo.className = "qloo-status";
+
+  if (error) {
+    qloo.textContent = `Request error: ${
+      errorMessage || "Please try again."
+    }`;
+  } else if (data?.research?.status === "success") {
+    qloo.textContent =
+      data?.research?.source === "Qloo"
+        ? "Research source: Qloo. Recommendations are shown below when available."
+        : "Research completed. See the results below.";
+  } else {
+    qloo.textContent =
+      "Live cultural data could not be confirmed. Check the research status.";
+  }
+
+  result.replaceChildren(heading, intro, list, qloo);
   result.classList.add("show");
 }
 
-
-const agents = [
-{
-name: "Planner",
-description: "Creates your discovery plan",
-getStatus(data) {
-const status = data?.plan?.status;
-
-  return {
-    status: status === "plan_created"
-      ? "Plan created"
-      : status || "Status unavailable",
-    detail: data?.plan?.plan?.[0]?.task ||
-      "Understands your interests and category.",
-    state: status === "plan_created" ? "complete" : "waiting"
-  };
-}
-
-},
-{
-name: "Researcher",
-description: "Checks cultural data sources",
-getStatus(data) {
-const research = data?.research || {};
-const waiting = research.status === "waiting_for_api_access";
-
-  return {
-    status: waiting
-      ? "Waiting for Qloo API access"
-      : research.status || "Status unavailable",
-    detail: research.message || this.description,
-    state: waiting ? "pending"
-      : research.status ? "complete" : "waiting"
-  };
-}
-
-},
-{
-name: "Recommender",
-description: "Prepares relevant recommendations",
-getStatus(data) {
-const recommendation = data?.recommendation || {};
-const waiting =
-recommendation.recommendation_status === "awaiting_qloo_data";
-
-  return {
-    status: waiting
-      ? "Awaiting cultural data"
-      : recommendation.recommendation_status || "Status unavailable",
-    detail: recommendation.message || this.description,
-    state: waiting ? "pending"
-      : recommendation.recommendation_status ? "complete" : "waiting"
-  };
-}
-
-},
-{
-name: "Reviewer",
-description: "Checks recommendation availability",
-getStatus(data) {
-const review = data?.review || {};
-const waiting = review.review_status === "pending_data";
-
-  return {
-    status: waiting
-      ? "Waiting for recommendation data"
-      : review.review_status || "Status unavailable",
-    detail: review.reason || this.description,
-    state: waiting ? "pending"
-      : review.approved === true ? "complete"
-      : review.review_status ? "pending" : "waiting"
-  };
-}
-
-},
-{
-name: "Executor",
-description: "Returns the final result",
-getStatus(data) {
-const finalResult = data?.final_result || {};
-const status = finalResult.status;
-
-  return {
-    status: status === "success"
-      ? "Results ready"
-      : status === "pending"
-        ? "Results pending"
-        : status || "Status unavailable",
-    detail: finalResult.message || this.description,
-    state: status === "success" ? "complete"
-      : status === "pending" ? "pending"
-      : status ? "error" : "waiting"
-  };
-}
-
-}
-];
-
-categoryButtons.forEach((button) => {
-button.addEventListener("click", () => {
-selectedCategory = button.dataset.category;
-
-categoryButtons.forEach((item) => {
-  const active = item === button;
-  item.classList.toggle("active", active);
-  item.setAttribute("aria-pressed", String(active));
-});
-
-});
-});
-
-function renderWorkflow(data = null, error = false, errorMessage = "") {
-const heading = document.createElement("h3");
-heading.textContent = error
-? "Workflow Connection Issue"
-: "CulturePilot Agent Workflow";
-
-const intro = document.createElement("p");
-
-if (error) {
-intro.textContent =
-"The backend request could not be completed. Please try again.";
-} else if (data) {
-intro.textContent =
-  `Category: ${data.plan?.category || selectedCategory} · ` +
-  `Interests: ${data.plan?.interests || interestsInput.value.trim()}`;
-
-
-} else {
-intro.textContent = "Preparing your five-agent discovery workflow...";
-}
-
-const list = document.createElement("div");
-list.className = "agent-list";
-
-agents.forEach((agent, index) => {
-const card = document.createElement("div");
-card.className = "agent-card";
-
-const icon = document.createElement("span");
-icon.className = "agent-icon";
-
-const content = document.createElement("div");
-content.className = "agent-content";
-
-const title = document.createElement("strong");
-title.textContent = `${index + 1}. ${agent.name}`;
-
-const statusLine = document.createElement("p");
-const detail = document.createElement("p");
-
-let agentStatus = {
-  status: "Waiting for workflow",
-  detail: agent.description,
-  state: "waiting"
-};
-
-if (error) {
-  agentStatus = {
-    status: "Status not confirmed",
-    detail: "The request failed before the result could be verified.",
-    state: "error"
-  };
-} else if (data) {
-  agentStatus = agent.getStatus(data);
-}
-
-const symbols = {
-  complete: "✓",
-  pending: "⏳",
-  waiting: "○",
-  error: "!"
-};
-
-icon.textContent = symbols[agentStatus.state] || "○";
-icon.classList.add(`status-${agentStatus.state}`);
-
-statusLine.textContent = `Status: ${agentStatus.status}`;
-detail.textContent = agentStatus.detail;
-
-content.append(title, statusLine, detail);
-card.append(icon, content);
-list.appendChild(card);
-
-});
-
-const qloo = document.createElement("p");
-qloo.className = "qloo-status";
-
-if (error) {
-  qloo.textContent = errorMessage
-    ? `Request error: ${errorMessage}`
-    : "Qloo status: Unable to verify.";
-} else if (data?.plan?.qloo_connected === false) {
-  qloo.textContent =
-    "Qloo API: Access pending. Live cultural data and personalized " +
-    "recommendations are not available yet.";
-} else if (data?.plan?.qloo_connected === true) {
-  qloo.textContent =
-    `Qloo API: Connected. ${data?.final_result?.message || ""}`;
-} else {
-  qloo.textContent =
-    "Qloo API status was not provided by the backend.";
-}
-
-result.replaceChildren(heading, intro, list, qloo);
-result.classList.add("show");
-}
-
-
-
-
-  
-   
-
-
-
-
-
+// Submit recommendation request
 form.addEventListener("submit", async (event) => {
-event.preventDefault();
+  event.preventDefault();
 
-const interests = interestsInput.value.trim();
+  const interests = interestsInput.value.trim();
 
-if (!interests) {
-interestsInput.focus();
-return;
-}
+  if (!interests) {
+    interestsInput.focus();
+    return;
+  }
 
-submitButton.disabled = true;
-submitButton.textContent = "Running agents...";
+  submitButton.disabled = true;
+  submitButton.textContent = "Running agents...";
 
-renderWorkflow();
+  renderWorkflow();
 
-try {
-const response = await fetch(`${API_BASE_URL}/agent/recommend`, {
-method: "POST",
-headers: {
-"Content-Type": "application/json"
-},
-body: JSON.stringify({
-interests,
-category: selectedCategory
-})
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/agent/recommend`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          interests,
+          category: selectedCategory
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      const message = typeof data.detail === "string"
+        ? data.detail
+        : "The backend request failed.";
+
+      throw new Error(message);
+    }
+
+    console.log("CulturePilot workflow:", data);
+
+    renderWorkflow(data);
+    renderRecommendations(data);
+
+  } catch (error) {
+    console.error("CulturePilot API error:", error);
+
+    renderWorkflow(
+      null,
+      true,
+      error.message || "Please try again."
+    );
+
+  } finally {
+    submitButton.disabled = false;
+    submitButton.innerHTML =
+      'Explore My Taste <span aria-hidden="true">→</span>';
+  }
 });
-
-const data = await response.json();
-
-if (!response.ok) {
-  const message = typeof data.detail === "string"
-    ? data.detail
-    : "The backend request failed.";
-
-  throw new Error(message);
-}
-
-
-renderWorkflow(data);
-
-const qlooConnected = data?.plan?.qloo_connected === true;
-const recommendationsReady = data?.final_result?.status === "success";
-
-if (!qlooConnected && !recommendationsReady) {
-  showDemoRecommendations(selectedCategory, interests);
-}
-
-console.log("CulturePilot workflow:", data);
-
-
-
-} catch (error) {
-console.error("CulturePilot API error:", error);
-
-renderWorkflow(
-  null,
-  true,
-  error.message || "Please try again."
-);
-
-} finally {
-  submitButton.disabled = false;
-  submitButton.innerHTML =
-    'Explore My Taste <span aria-hidden="true">→</span>';
-}
-});
+p
 
 
 
