@@ -201,28 +201,29 @@ if (error) {
   qloo.textContent = errorMessage
     ? `Request error: ${errorMessage}`
     : "Qloo status: Unable to verify.";
-}
-
-
-
- else if (data?.plan?.qloo_connected === false) {
-qloo.textContent =
-"Qloo API: Access pending. Live cultural data and personalized " +
-"recommendations are not available yet.";
-} } else if (data?.plan?.qloo_connected === true) {
+} else if (data?.plan?.qloo_connected === false) {
+  qloo.textContent =
+    "Qloo API: Access pending. Live cultural data and personalized " +
+    "recommendations are not available yet.";
+} else if (data?.plan?.qloo_connected === true) {
   qloo.textContent =
     `Qloo API: Connected. ${data?.final_result?.message || ""}`;
-}
-
-
- else {
-qloo.textContent =
-"Qloo API status was not provided by the backend.";
+} else {
+  qloo.textContent =
+    "Qloo API status was not provided by the backend.";
 }
 
 result.replaceChildren(heading, intro, list, qloo);
 result.classList.add("show");
-}
+
+
+
+  
+   
+
+
+
+
 
 form.addEventListener("submit", async (event) => {
 event.preventDefault();
