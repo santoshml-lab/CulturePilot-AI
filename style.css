@@ -504,6 +504,117 @@ transform: translateY(0);
 }
 }
 
+/* CulturePilot AI — Premium UI Polish */
+
+.discovery {
+  backdrop-filter: blur(18px);
+  box-shadow:
+    0 25px 90px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.agent-list {
+  padding: 6px 0;
+}
+
+.agent-card {
+  background:
+    linear-gradient(135deg, rgba(25, 30, 54, 0.96),
+    rgba(12, 16, 32, 0.96));
+  border-color: rgba(167, 139, 250, 0.22);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.agent-card:hover {
+  border-color: rgba(103, 232, 249, 0.65);
+  box-shadow: 0 10px 30px rgba(103, 232, 249, 0.08);
+}
+
+.agent-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    rgba(167, 139, 250, 0.18),
+    rgba(103, 232, 249, 0.09)
+  );
+}
+
+.status-complete,
+.status-pending,
+.status-waiting,
+.status-error {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 9px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.5;
+}
+
+.status-complete {
+  color: #67e8a5;
+  border-color: rgba(103, 232, 165, 0.3);
+  background: rgba(103, 232, 165, 0.08);
+}
+
+.status-pending {
+  color: #fcd34d;
+  border-color: rgba(252, 211, 77, 0.3);
+  background: rgba(252, 211, 77, 0.08);
+}
+
+.status-waiting {
+  color: #c4cbe0;
+  background: rgba(163, 171, 197, 0.07);
+}
+
+.status-error {
+  color: #fca5a5;
+  border-color: rgba(252, 165, 165, 0.3);
+  background: rgba(252, 165, 165, 0.08);
+}
+
+.primary-btn:focus-visible,
+.category:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 4px;
+}
+
+.primary-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.primary-btn:hover {
+  box-shadow: 0 12px 32px rgba(129, 140, 248, 0.28);
+}
+
+.preview-card {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+@media (max-width: 650px) {
+  .agent-card {
+    padding: 13px;
+  }
+
+  .agent-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .discovery {
+    margin-top: 24px;
+  }
+}
+
 
   
 
