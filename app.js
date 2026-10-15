@@ -1,3 +1,5 @@
+alert("CulturePilot app.js is loading");
+
 const API_BASE_URL = "https://culturepilot-ai-agent.onrender.com";
 
 const form = document.getElementById("cultureForm");
