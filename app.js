@@ -120,23 +120,26 @@ categoryButtons.forEach((button) => {
 
 // Safely create a recommendation card
 
+
 function createRecommendationCard(item) {
   const card = document.createElement("article");
   card.className = "recommendation-card";
 
   const title = document.createElement("h3");
   title.textContent = item.title || item.name || "Untitled recommendation";
-
-  const description = document.createElement("p");
-  description.textContent =
-    item.description ||
-    item.plot_summary ||
-    item.genre_description ||
-    "No additional description available.";
-
   card.appendChild(title);
 
-  // Display the heuristic relevance score when available.
+  // Display the real image returned by Qloo
+  if (item.image_url && /^https?:\/\//i.test(item.image_url)) {
+    const image = document.createElement("img");
+    image.src = item.image_url;
+    image.alt = `${title.textContent} image`;
+    image.loading = "lazy";
+    image.className = "recommendation-image";
+    image.onerror = () => image.remove();
+    card.appendChild(image);
+  }
+
   if (typeof item.match_score === "number") {
     const score = document.createElement("p");
     score.className = "match-score";
@@ -144,7 +147,6 @@ function createRecommendationCard(item) {
     card.appendChild(score);
   }
 
-  // Explain which interests matched.
   if (item.match_reason) {
     const reason = document.createElement("p");
     reason.className = "match-reason";
@@ -152,6 +154,12 @@ function createRecommendationCard(item) {
     card.appendChild(reason);
   }
 
+  const description = document.createElement("p");
+  description.textContent =
+    item.description ||
+    item.plot_summary ||
+    item.genre_description ||
+    "No additional description available.";
   card.appendChild(description);
 
   if (item.source) {
@@ -162,6 +170,8 @@ function createRecommendationCard(item) {
 
   return card;
 }
+
+  
 
   
 
